@@ -1,11 +1,5 @@
-//
-//  talkMacrosApp.swift
-//  talkMacros
-//
-//  Created by Julian  on 4/18/26.
-//
-
 import SwiftUI
+import SwiftData
 
 @main
 struct talkMacrosApp: App {
@@ -13,5 +7,6 @@ struct talkMacrosApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [DailyLog.self, MealEntry.self])
     }
 }

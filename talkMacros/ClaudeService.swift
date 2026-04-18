@@ -56,7 +56,7 @@ final class ClaudeService {
     static let shared = ClaudeService()
 
     private let endpoint = URL(string: "https://api.anthropic.com/v1/messages")!
-    private let model = "claude-opus-4-5"
+    private let model = "claude-haiku-4-5-20251001"
 
     private init() {}
 

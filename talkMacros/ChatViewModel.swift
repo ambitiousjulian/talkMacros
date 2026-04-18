@@ -119,8 +119,8 @@ final class ChatViewModel: ObservableObject {
                 let response = try await ClaudeService.shared.sendMessage(
                     userMessage: trimmed,
                     conversationHistory: history,
-                    dailyCalories: todayCalories,
-                    dailyProtein: todayProtein,
+                    dailyCalories: activeLog?.totalCalories ?? todayCalories,
+                    dailyProtein: activeLog?.totalProtein  ?? todayProtein,
                     calorieGoal: settings.calorieGoal,
                     proteinGoal: settings.proteinGoal
                 )
@@ -128,8 +128,10 @@ final class ChatViewModel: ObservableObject {
                 var assistantMsg = ChatMessage(content: response.reply, isUser: false)
 
                 if let cal = response.calories, let prot = response.protein {
-                    let newDailyCal  = response.dailyTotalCalories ?? (todayCalories + cal)
-                    let newDailyProt = response.dailyTotalProtein  ?? (todayProtein  + prot)
+                    let currentCals  = activeLog?.totalCalories ?? todayCalories
+                    let currentProt  = activeLog?.totalProtein  ?? todayProtein
+                    let newDailyCal  = response.dailyTotalCalories ?? (currentCals + cal)
+                    let newDailyProt = response.dailyTotalProtein  ?? (currentProt + prot)
                     assistantMsg.mealCard = MealCard(
                         name: response.mealName ?? "Meal",
                         calories: cal,

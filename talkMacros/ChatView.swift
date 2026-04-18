@@ -124,17 +124,25 @@ struct ChatView: View {
     @StateObject private var vm = ChatViewModel()
     @StateObject private var speech = SpeechRecognizer()
     @ObservedObject private var settings = SettingsManager.shared
+    @Query private var allLogs: [DailyLog]
 
     @State private var inputText = ""
     @State private var showPermissionAlert = false
 
+    private var todayLog: DailyLog? {
+        let today = DateFormatter.dayFormatter.string(from: Date())
+        return allLogs.first { $0.dateString == today }
+    }
+    private var liveCals: Int  { todayLog?.totalCalories ?? vm.todayCalories }
+    private var liveProt: Int  { todayLog?.totalProtein  ?? vm.todayProtein  }
+
     private var calProgress: Double {
         guard settings.calorieGoal > 0 else { return 0 }
-        return min(Double(vm.todayCalories) / Double(settings.calorieGoal), 1.0)
+        return min(Double(liveCals) / Double(settings.calorieGoal), 1.0)
     }
     private var protProgress: Double {
         guard settings.proteinGoal > 0 else { return 0 }
-        return min(Double(vm.todayProtein) / Double(settings.proteinGoal), 1.0)
+        return min(Double(liveProt) / Double(settings.proteinGoal), 1.0)
     }
     private var canSend: Bool {
         !inputText.trimmingCharacters(in: .whitespaces).isEmpty && !vm.isLoading
@@ -155,7 +163,7 @@ struct ChatView: View {
                 .animation(.spring(duration: 0.3), value: speech.isRecording)
                 inputBar
             }
-            .navigationTitle("talkMacros")
+            .navigationTitle("Talk Macros")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color(.secondarySystemBackground), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -203,7 +211,7 @@ struct ChatView: View {
                 }
 
                 HStack(spacing: 0) {
-                    LargeRingView(value: vm.todayCalories, goal: settings.calorieGoal,
+                    LargeRingView(value: liveCals, goal: settings.calorieGoal,
                                   color: .orange, icon: "flame.fill", label: "Calories")
                         .frame(maxWidth: .infinity)
 
@@ -214,7 +222,7 @@ struct ChatView: View {
                     }
                     .padding(.horizontal, 6)
 
-                    LargeRingView(value: vm.todayProtein, goal: settings.proteinGoal,
+                    LargeRingView(value: liveProt, goal: settings.proteinGoal,
                                   color: .green, icon: "bolt.fill", label: "Protein")
                         .frame(maxWidth: .infinity)
                 }

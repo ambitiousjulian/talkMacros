@@ -109,9 +109,13 @@ struct LargeRingView: View {
                     .frame(maxWidth: 110)
                     .padding(.top, 1)
                 Text(remaining)
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(progress >= 1 ? color : color.opacity(0.8))
-                    .padding(.top, 1)
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundColor(progress >= 1 ? .black : color)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(progress >= 1 ? color : color.opacity(0.15))
+                    .clipShape(Capsule())
+                    .padding(.top, 2)
             }
         }
     }

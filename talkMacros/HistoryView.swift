@@ -3,52 +3,91 @@ import SwiftData
 
 struct HistoryView: View {
     @Query(sort: \DailyLog.date, order: .reverse) private var logs: [DailyLog]
-    @Environment(\.modelContext) private var modelContext
+
+    private var todayLog: DailyLog? {
+        let today = DateFormatter.dayFormatter.string(from: Date())
+        return logs.first { $0.dateString == today }
+    }
 
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(logs) { log in
-                    NavigationLink(destination: DayDetailView(log: log)) {
-                        DayCard(log: log)
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
-                    .listRowSeparator(.hidden)
-                }
-                .onDelete { offsets in
-                    for i in offsets { modelContext.delete(logs[i]) }
-                    try? modelContext.save()
+            Group {
+                if let log = todayLog {
+                    DayDetailView(log: log)
+                } else {
+                    emptyToday
                 }
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .background(Color(.systemBackground))
-            .overlay {
-                if logs.isEmpty {
-                    VStack(spacing: 16) {
-                        ZStack {
-                            Circle().fill(Color(.secondarySystemBackground))
-                                .frame(width: 80, height: 80)
-                            Image(systemName: "calendar")
-                                .font(.system(size: 32, weight: .semibold))
-                                .foregroundColor(.secondary)
-                        }
-                        VStack(spacing: 6) {
-                            Text("No History Yet")
-                                .font(.headline)
-                            Text("Your daily meal logs will appear here")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                        }
+            .navigationTitle("Today")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: HistoryListView()) {
+                        Label("History", systemImage: "calendar")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.green)
                     }
-                    .padding()
                 }
             }
-            .navigationTitle("History")
-            .toolbar { EditButton().tint(.green) }
         }
+    }
+
+    private var emptyToday: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                Circle().fill(Color(.secondarySystemBackground)).frame(width: 80, height: 80)
+                Image(systemName: "fork.knife").font(.system(size: 32, weight: .semibold)).foregroundColor(.secondary)
+            }
+            VStack(spacing: 6) {
+                Text("Nothing logged yet").font(.headline)
+                Text("Head to the chat tab to log your first meal").font(.subheadline).foregroundColor(.secondary).multilineTextAlignment(.center)
+            }
+        }
+        .padding()
+    }
+}
+
+// MARK: - History List
+
+struct HistoryListView: View {
+    @Query(sort: \DailyLog.date, order: .reverse) private var logs: [DailyLog]
+    @Environment(\.modelContext) private var modelContext
+
+    var body: some View {
+        List {
+            ForEach(logs) { log in
+                NavigationLink(destination: DayDetailView(log: log)) {
+                    DayCard(log: log)
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                .listRowSeparator(.hidden)
+            }
+            .onDelete { offsets in
+                for i in offsets { modelContext.delete(logs[i]) }
+                try? modelContext.save()
+            }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(Color(.systemBackground))
+        .overlay {
+            if logs.isEmpty {
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle().fill(Color(.secondarySystemBackground)).frame(width: 80, height: 80)
+                        Image(systemName: "calendar").font(.system(size: 32, weight: .semibold)).foregroundColor(.secondary)
+                    }
+                    VStack(spacing: 6) {
+                        Text("No History Yet").font(.headline)
+                        Text("Your daily meal logs will appear here").font(.subheadline).foregroundColor(.secondary).multilineTextAlignment(.center)
+                    }
+                }
+                .padding()
+            }
+        }
+        .navigationTitle("History")
+        .toolbar { EditButton().tint(.green) }
     }
 }
 

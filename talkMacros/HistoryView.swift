@@ -23,9 +23,13 @@ struct HistoryView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: HistoryListView()) {
-                        Label("History", systemImage: "calendar")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.green)
+                        HStack(spacing: 4) {
+                            Image(systemName: "clock")
+                                .font(.system(size: 13, weight: .medium))
+                            Text("History")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .foregroundColor(.secondary)
                     }
                 }
             }
